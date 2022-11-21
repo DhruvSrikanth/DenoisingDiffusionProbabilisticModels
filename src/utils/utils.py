@@ -4,7 +4,7 @@ import torch
 import torchvision
 from torchvision.io import read_image
 from torchvision.utils import save_image
-
+import matplotlib.animation as animation
 
 def exists(x):
     return x is not None
@@ -68,8 +68,25 @@ def save_image_grid(step, writer, n_images, samples):
 
     writer.add_image(f'Generated Images', img_grid, global_step=step)
 
+def create_gif(samples, image_size, num_channels, timesteps):
+    random_index = 53
+
+    fig = plt.figure()
+    ims = []
+    for i in range(timesteps):
+        im = plt.imshow(samples[i][random_index].reshape(image_size, image_size, num_channels), cmap="gray", animated=True)
+        ims.append([im])
+
+    animate = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
+    animate.save('diffusion.gif')
+    plt.show()
+
+
 def save_model(step, model):
     torch.save(
         model.state_dict(),
         f"runs/model_{step}.pt"
     )
+
+def load_model(epoch, model):
+    model.load_state_dict(torch.load(f"runs/model_{epoch}.pt"))
