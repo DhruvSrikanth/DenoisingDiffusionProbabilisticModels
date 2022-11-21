@@ -73,7 +73,7 @@ def create_gif(samples, n_images, image_size, num_channels, timesteps):
     fig = plt.figure()
     img_grids = []
     for i in range(timesteps):
-        n_square_images = samples[i][:n_images**2].reshape(n_images**2, image_size, image_size, num_channels)
+        n_square_images = torch.tensor(samples[i][:n_images**2].reshape(n_images**2, image_size, image_size, num_channels))
         image_grid = make_grid(n_square_images, nrow=n_images)
         img_grid = plt.imshow(image_grid, cmap="gray", animated=True)
         img_grids.append([img_grid])
