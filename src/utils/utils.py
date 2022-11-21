@@ -73,22 +73,26 @@ def create_gif(samples, n_images, image_size, num_channels, timesteps):
     fig = plt.figure()
     img_grids = []
     for i in range(timesteps):
-        n_square_images = torch.tensor(samples[i][:n_images**2].reshape(n_images**2, image_size, image_size, num_channels))
-        image_grid = make_grid(n_square_images, nrow=n_images)
-        img_grid = plt.imshow(image_grid, cmap="gray", animated=True)
+        n_square_images = torch.tensor(samples[i][:n_images**2].reshape(n_images**2, num_channels, image_size, image_size))
+        image_grid = make_grid(n_square_images, nrow=n_images, padding=2, pad_value=1, normalize=True)
+        img_grid = plt.imshow(image_grid.permute(1, 2, 0), animated=True)
         img_grids.append([img_grid])
 
-    animate = animation.ArtistAnimation(fig, img_grids, interval=10, blit=True, repeat_delay=1000)
+    plt.title("DDPM Generated Samples")
+    plt.axis("off")
+    plt.tight_layout()
+
+    animate = animation.ArtistAnimation(fig, img_grids, interval=5, blit=True, repeat_delay=1000)
     animate.save('diffusion.gif')
     plt.show()
 
 
-def save_model(step, model):
+def save_model(epoch, model):
     torch.save(
         model.state_dict(),
-        f"runs/model_{step}.pth"
+        f"runs/model_{epoch + 1}.pth"
     )
 
 def load_model(epoch, model, device):
-    state = torch.load(f"runs/model_{epoch}.pth", map_location=device)
+    state = torch.load(f"runs/model_{epoch + 1}.pth", map_location=device)
     model.load_state_dict(state)

@@ -150,3 +150,5 @@ weights/
 # runs
 runs/
 
+# diffusion gif
+*.gif
