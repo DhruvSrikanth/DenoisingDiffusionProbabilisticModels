@@ -39,7 +39,7 @@ class Sampler():
         img = torch.randn(shape, device=device)
         imgs = []
         
-        for i in tqdm(reversed(range(0, self.timesteps)), desc='sampling loop time step', total=self.timesteps):
+        for i in reversed(range(0, self.timesteps)):
             img = self.p_sample(model, img, torch.full((b,), i, device=device, dtype=torch.long), i)
             imgs.append(img.cpu().numpy())
         return imgs
