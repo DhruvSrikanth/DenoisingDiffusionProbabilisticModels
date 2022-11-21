@@ -14,7 +14,7 @@ class ConvNextBlock(nn.Module):
             else None
         )
 
-        self.ds_conv = nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=7, padding=3, groups=in_channels)
+        self.ds_conv = nn.Sequential(nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=7, padding=3, groups=in_channels))
 
         self.net = nn.Sequential(
             nn.GroupNorm(num_groups=1, num_channels=in_channels) if normalize else nn.Identity(),

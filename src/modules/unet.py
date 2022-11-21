@@ -65,15 +65,9 @@ class DDPM(nn.Module):
             )
 
         bottleneck_capacity = dims[-1]
-        self.bottleneck = [
-            nn.ModuleList(
-                [
-                    block_klass(bottleneck_capacity, bottleneck_capacity, time_embedding_dim=time_dim), 
-                    Residual(fn=PreNorm(bottleneck_capacity, Attention(bottleneck_capacity))), 
-                    block_klass(bottleneck_capacity, bottleneck_capacity, time_embedding_dim=time_dim), 
-                ]
-            )
-        ]
+        self.mid_block1 = block_klass(bottleneck_capacity, bottleneck_capacity, time_embedding_dim=time_dim)
+        self.mid_attn = Residual(PreNorm(bottleneck_capacity, Attention(bottleneck_capacity)))
+        self.mid_block2 = block_klass(bottleneck_capacity, bottleneck_capacity, time_embedding_dim=time_dim)
 
         
 
@@ -113,11 +107,9 @@ class DDPM(nn.Module):
             x = downsample(x)
         
         # bottleneck
-        for block1, attn, block2 in self.bottleneck:
-            x = block1(x, time_emb=t)
-            x = attn(x)
-            x = block2(x, time_emb=t)
-
+        x = self.mid_block1(x, time_emb=t)
+        x = self.mid_attn(x)
+        x = self.mid_block2(x, time_emb=t)
 
         # upsample
         for block1, block2, attn, upsample in self.decoder:

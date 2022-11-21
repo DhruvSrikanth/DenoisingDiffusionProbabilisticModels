@@ -146,3 +146,7 @@ weights/
 
 # pyenv files
 .python-version
+
+# runs
+runs/
+

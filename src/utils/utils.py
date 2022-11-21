@@ -1,5 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+import torchvision
+from torchvision.io import read_image
+from torchvision.utils import save_image
+
 
 def exists(x):
     return x is not None
@@ -48,3 +53,23 @@ def plot(image, imgs, with_orig=False, row_title=None, **imshow_kwargs):
             axs[row_idx, 0].set(ylabel=row_title[row_idx])
 
     plt.tight_layout()
+
+
+def visualize_loss(step, loss, loss_type, writer):
+    writer.add_scalar(f'{loss_type} loss', loss, step)
+
+
+def save_image_grid(step, writer, n_images, samples):
+    n_square_images = torch.tensor(samples[:n_images**2])
+    save_image(n_square_images, f"results/sample_{step}.png", nrow=n_images, normalize=True)
+
+    # Read in and add to tensorboard
+    img_grid = read_image(f"results/sample_{step}.png", mode=torchvision.io.ImageReadMode.GRAY)
+
+    writer.add_image(f'Generated Images', img_grid, global_step=step)
+
+def save_model(step, model):
+    torch.save(
+        model.state_dict(),
+        f"runs/model_{step}.pt"
+    )
