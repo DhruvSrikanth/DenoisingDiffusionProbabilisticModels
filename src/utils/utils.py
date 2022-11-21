@@ -82,7 +82,7 @@ def create_gif(samples, n_images, image_size, num_channels, timesteps):
     plt.axis("off")
     plt.tight_layout()
 
-    animate = animation.ArtistAnimation(fig, img_grids, interval=5, blit=True, repeat_delay=1000)
+    animate = animation.ArtistAnimation(fig, img_grids, interval=10, blit=True, repeat_delay=5000)
     animate.save('diffusion.gif')
     plt.show()
 
@@ -94,5 +94,5 @@ def save_model(epoch, model):
     )
 
 def load_model(epoch, model, device):
-    state = torch.load(f"runs/model_{epoch + 1}.pth", map_location=device)
+    state = torch.load(f"runs/model_{epoch}.pth", map_location=device)
     model.load_state_dict(state)
