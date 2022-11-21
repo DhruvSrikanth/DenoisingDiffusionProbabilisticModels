@@ -4,6 +4,7 @@ import torch
 import torchvision
 from torchvision.io import read_image
 from torchvision.utils import save_image
+from torchvision.utils import make_grid
 import matplotlib.animation as animation
 
 def exists(x):
@@ -68,16 +69,16 @@ def save_image_grid(step, writer, n_images, samples):
 
     writer.add_image(f'Generated Images', img_grid, global_step=step)
 
-def create_gif(samples, image_size, num_channels, timesteps):
-    random_index = 53
-
+def create_gif(samples, n_images, image_size, num_channels, timesteps):
     fig = plt.figure()
-    ims = []
+    img_grids = []
     for i in range(timesteps):
-        im = plt.imshow(samples[i][random_index].reshape(image_size, image_size, num_channels), cmap="gray", animated=True)
-        ims.append([im])
+        n_square_images = samples[i][:n_images**2].reshape(n_images**2, image_size, image_size, num_channels)
+        image_grid = make_grid(n_square_images, nrow=n_images)
+        img_grid = plt.imshow(image_grid, cmap="gray", animated=True)
+        img_grids.append([img_grid])
 
-    animate = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
+    animate = animation.ArtistAnimation(fig, img_grids, interval=10, blit=True, repeat_delay=1000)
     animate.save('diffusion.gif')
     plt.show()
 
@@ -85,8 +86,9 @@ def create_gif(samples, image_size, num_channels, timesteps):
 def save_model(step, model):
     torch.save(
         model.state_dict(),
-        f"runs/model_{step}.pt"
+        f"runs/model_{step}.pth"
     )
 
-def load_model(epoch, model):
-    model.load_state_dict(torch.load(f"runs/model_{epoch}.pt"))
+def load_model(epoch, model, device):
+    state = torch.load(f"runs/model_{epoch}.pth", map_location=device)
+    model.load_state_dict(state)
