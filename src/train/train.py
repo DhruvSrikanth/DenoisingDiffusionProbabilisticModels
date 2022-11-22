@@ -36,7 +36,7 @@ def train(image_size, num_channels, epochs, timesteps, sample_and_save_freq, sav
                     samples = sampler.sample(model=denoising_model, image_size=image_size, batch_size=batch_size, channels=num_channels)
                     all_images = samples[-1] 
                     all_images = (all_images + 1) * 0.5
-                    save_image_grid(step=(step*len(dataloader) + step), writer=writer, n_images=5, samples=all_images)
+                    save_image_grid(step=(epoch*len(dataloader) + step), writer=writer, n_images=5, samples=all_images)
 
         save_model(epoch=epoch, model=denoising_model)
 
