@@ -2,20 +2,20 @@ import numpy as np
 import pandas as pd
 import src
 import torch
-from torchvision.transforms import Compose, Lambda, ToPILImage
+from torchvision.transforms import Compose, Lambda, ToPILImage, RandomHorizontalFlip, ToTensor
 from torch.utils.data import DataLoader
 from datasets import load_dataset
 from tqdm import tqdm
 
 def transforms(examples):
         forward_transform = Compose([
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(),
-                    transforms.Lambda(lambda t: (t * 2) - 1)
+                    RandomHorizontalFlip(),
+                    ToTensor(),
+                    Lambda(lambda t: (t * 2) - 1)
         ])
         
-        examples["pixel_values"] = [forward_transform(image.convert("L")) for image in examples["image"]]
-        del examples["image"]
+        examples["pixel_values"] = [forward_transform(image.convert("RGB" if image.mode == "RGB" else "L")) for image in examples["img"]]
+        del examples["img"]
 
         return examples
 
@@ -58,7 +58,7 @@ def get_losses(models_path, epochs, dataloader, timesteps, forward_diffusion_mod
         model.load_state_dict(state)
         model.to(device)
 
-        loss = get_model_loss(dataloader=dataloader, timesteps=timesteps, forward_diffusion=forward_diffusion_model, denoising_model=model, criterion=criterion, loss_type=loss_type, device=device)
+        loss = get_model_loss(dataloader=dataloader, timesteps=timesteps, forward_diffusion_model=forward_diffusion_model, denoising_model=model, criterion=criterion, loss_type=loss_type, device=device)
         losses.append(loss)
     return losses
 
@@ -80,7 +80,7 @@ def get_loss_experiment(root_path, scheduler_choice):
     dataset_name = "cifar10"
     train_dataloader, val_dataloader = get_dataloaders(dataset_name=dataset_name, batch_size=batch_size)
 
-    device = "cpu"
+    device = "cuda"
     device = torch.device(device)
 
     # root_path = "../runs"
@@ -109,6 +109,8 @@ def get_loss_experiment(root_path, scheduler_choice):
 
     epochs = 50
     loss_type="huber"
+    print("Training Losses:")
+    print("-"*50)
     train_losses = get_losses(
         models_path=models_path, 
         epochs=epochs, dataloader=train_dataloader, 
@@ -119,7 +121,12 @@ def get_loss_experiment(root_path, scheduler_choice):
         loss_type=loss_type, 
         device=device
     )
+    print("-"*50)
 
+    print(" ")
+
+    print("Inference Losses:")
+    print("-"*50)
     val_losses = get_losses(
         models_path=models_path,
         epochs=epochs, dataloader=val_dataloader,
